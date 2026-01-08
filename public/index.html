@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academic AI Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Outfit', sans-serif; }
+        
+        /* Glassmorphism Classes */
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
+
+        /* Animations */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeIn 0.3s ease-out forwards; }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#6366f1', // Indigo 500
+                        secondary: '#ec4899', // Pink 500
+                        dark: '#0f172a', // Slate 900
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-900 text-white h-screen flex overflow-hidden bg-[url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop')] bg-cover bg-center">
+    
+    <!-- Overlay for readability -->
+    <div class="absolute inset-0 bg-gray-900/90 backdrop-blur-sm z-0"></div>
+
+    <!-- Main Container -->
+    <div class="relative z-10 flex w-full h-full p-4 gap-4">
+        
+        <!-- Sidebar -->
+        <aside class="w-64 flex flex-col glass-panel rounded-2xl p-4 shadow-2xl">
+            <div class="mb-8 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center font-bold text-lg">AI</div>
+                <h1 class="text-xl font-semibold tracking-wide">Academic<span class="text-primary">Assistant</span></h1>
+            </div>
+
+            <nav class="flex-1 space-y-2">
+                <button onclick="switchView('chat')" id="nav-chat" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 bg-white/10 text-white shadow-lg border border-white/5">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
+                    <span>Chat Assistant</span>
+                </button>
+                <button onclick="switchView('summarize')" id="nav-summarize" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 hover:bg-white/5 text-gray-400 hover:text-white border border-transparent">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    <span>Summarizer</span>
+                </button>
+            </nav>
+
+            <div class="mt-auto pt-4 border-t border-white/10">
+                <div class="text-xs text-center text-gray-500">v1.0.0 • Powered by Llama 3</div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 glass-panel rounded-2xl relative overflow-hidden flex flex-col shadow-2xl">
+            
+            <!-- Chat View -->
+            <div id="view-chat" class="flex flex-col h-full fade-in">
+                <!-- Chat Header -->
+                <div class="p-6 border-b border-white/5 flex justify-between items-center">
+                    <div>
+                        <h2 class="text-2xl font-semibold">Research Assistant</h2>
+                        <p class="text-sm text-gray-400">Ask about your thesis, assignments, or coding problems.</p>
+                    </div>
+                    <div class="bg-green-500/20 text-green-400 text-xs px-3 py-1 rounded-full border border-green-500/20">Online</div>
+                </div>
+
+                <!-- Messages Area -->
+                <div id="chat-messages" class="flex-1 overflow-y-auto p-6 space-y-6">
+                    <!-- Welcome Message -->
+                    <div class="flex gap-4">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary flex-shrink-0 flex items-center justify-center text-xs font-bold">AI</div>
+                        <div class="flex-1">
+                            <div class="glass p-4 rounded-2xl rounded-tl-none inline-block max-w-[80%] text-gray-200">
+                                Hello! I'm your Academic Assistant. How can I help you with your studies today?
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Input Area -->
+                <div class="p-4 border-t border-white/5">
+                    <form onsubmit="handleChatSubmit(event)" class="relative">
+                        <input type="text" id="chat-input" 
+                            class="w-full bg-slate-800/50 border border-slate-700 text-white rounded-xl px-4 py-4 pr-12 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary placeholder-gray-500 transition-all"
+                            placeholder="Type your question..." autocomplete="off">
+                        <button type="submit" id="send-btn" class="absolute right-2 top-2 p-2 bg-primary hover:bg-indigo-600 rounded-lg text-white transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Summarizer View -->
+            <div id="view-summarize" class="hidden flex-col h-full fade-in">
+                <div class="p-6 border-b border-white/5">
+                    <h2 class="text-2xl font-semibold">Document Summarizer</h2>
+                    <p class="text-sm text-gray-400">Paste your text/paper abstract below to get a concise summary.</p>
+                </div>
+                
+                <div class="flex-1 p-6 flex flex-col md:flex-row gap-6 overflow-hidden">
+                    <div class="flex-1 flex flex-col">
+                        <label class="text-sm font-medium text-gray-300 mb-2">Input Text</label>
+                        <textarea id="summary-input" class="flex-1 w-full bg-slate-800/50 border border-slate-700 rounded-xl p-4 text-gray-300 focus:outline-none focus:border-secondary resize-none" placeholder="Paste your academic text here..."></textarea>
+                    </div>
+                    
+                    <div class="flex items-center justify-center p-2">
+                        <button onclick="handleSummarize()" id="summarize-btn" class="bg-secondary hover:bg-pink-600 text-white px-6 py-3 rounded-xl font-medium transition-all shadow-lg shadow-pink-500/20 flex items-center gap-2">
+                            <span>Summarize</span>
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        </button>
+                    </div>
+
+                    <div class="flex-1 flex flex-col">
+                        <label class="text-sm font-medium text-gray-300 mb-2">Result</label>
+                        <div id="summary-output" class="flex-1 w-full glass rounded-xl p-4 text-gray-300 overflow-y-auto">
+                            <span class="text-gray-600 italic">Summary will appear here...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

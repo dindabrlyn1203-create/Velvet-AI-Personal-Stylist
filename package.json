@@ -1,0 +1,18 @@
+{
+    "name": "academic-ai-assistant",
+    "version": "1.0.0",
+    "description": "Desktop AI Assistant using PHP and Electron",
+    "main": "main.js",
+    "scripts": {
+        "start": "electron .",
+        "dist": "electron-builder"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+        "electron": "^28.0.0",
+        "concurrently": "^8.2.0",
+        "wait-on": "^7.2.0"
+    }
+}
